@@ -10,7 +10,7 @@
 #include <iostream>
 
 int main(int argc, char **argv) {
-    ANN ann("inner-product", 128);
+    ann::ANN ann("inner-product", 128);
     std::cout << "DONE" << std::endl;
     return 0;
 }
