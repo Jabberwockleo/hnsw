@@ -91,6 +91,7 @@ int ANN::create_index(const size_t max_nodes, const size_t M,
         M, ef_construction, random_seed);
     this->_is_index_initialized = true;
     this->_is_entry_point_added = false;
+
     return 0;
 }
 
@@ -146,6 +147,7 @@ int ANN::insert_nodes(const std::vector<std::vector<float> > &data,
 
 int ANN::save_index(const std::string &path) {
     this->_graph->saveIndex(path);
+
     return 0;
 }
 
@@ -159,11 +161,13 @@ int ANN::load_index(const std::string &path, const size_t max_nodes) {
         false,
         max_nodes);
     this->_current_node_label = this->_graph->cur_element_count;
+
     return 0;
 }
 
 std::vector<QueryResult> ANN::knn_query(
             const std::vector<std::vector<float> > &queries, size_t k) {
+    // TODO
     return std::vector<QueryResult>();
 }
 
