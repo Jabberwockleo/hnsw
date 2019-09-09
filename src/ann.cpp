@@ -134,7 +134,7 @@ int ANN::insert_nodes(const std::vector<std::vector<float> > &data,
                 normalize_vector(data.at(internal_idx).data(),
                     (parallel_normvec.data() + parallel_normvec_idx0_pos));
                 this->_graph->addPoint(
-                    (void *)(parallel_normvec.data() + internal_idx),
+                    (void *)(parallel_normvec.data() + parallel_normvec_idx0_pos),
                     idx);
             } else {
                 this->_graph->addPoint((void *)data.at(internal_idx).data(), idx);
@@ -167,8 +167,42 @@ int ANN::load_index(const std::string &path, const size_t max_nodes) {
 
 std::vector<QueryResult> ANN::knn_query(
             const std::vector<std::vector<float> > &queries, size_t k) {
-    // TODO
-    return std::vector<QueryResult>();
+    auto empty_result = std::vector<QueryResult>();
+    for (auto &query : queries) {
+        size_t dim = query.size();
+        if (dim != this->_feature_dim) {
+            return empty_result;
+        }
+    }
+
+    int num_threads = this->_num_threads;
+    if (queries.size() < num_threads * 8) {
+        num_threads = 1;
+    }
+
+    std::vector<QueryResult> result(queries.size());
+    std::vector<float> parallel_normvec(num_threads * this->_feature_dim);
+    parallel_for_loop(0, queries.size(), num_threads,
+        [&](size_t internal_idx, size_t thread_id) {
+            auto &query = queries[internal_idx];
+            if (this->_normalize) {
+                size_t parallel_normvec_idx0_pos = thread_id * this->_feature_dim;
+                normalize_vector(query.data(),
+                    (parallel_normvec.data() + parallel_normvec_idx0_pos));
+                std::priority_queue<std::pair<float, hnswlib::labeltype> > \
+                    search_result = this->_graph->searchKnn(
+                    (void *)(parallel_normvec.data() + parallel_normvec_idx0_pos), k);
+                QueryResult query_result(search_result);
+                result[internal_idx] = std::move(query_result);
+            } else {
+                std::priority_queue<std::pair<float, hnswlib::labeltype> > \
+                    search_result = this->_graph->searchKnn((void *)(query.data()), k);
+                QueryResult query_result(search_result);
+                result[internal_idx] = std::move(query_result);
+            }
+        });
+
+    return result;
 }
 
 void ANN::normalize_vector(const float *data, float *norm_data) {

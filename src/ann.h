@@ -22,7 +22,13 @@ struct QueryResult {
     size_t topk;
     std::vector<hnswlib::labeltype> indices;
     std::vector<float> distances;
-    QueryResult(std::priority_queue<std::pair<float, hnswlib::labeltype> > knn) {
+    explicit QueryResult() {
+        this->topk = 0;
+        this->indices.clear();
+        this->distances.clear();
+    }
+
+    explicit QueryResult(std::priority_queue<std::pair<float, hnswlib::labeltype> > knn) {
         this->topk = knn.size();
         this->indices = std::move(std::vector<hnswlib::labeltype>(this->topk));
         this->distances = std::move(std::vector<float>(this->topk));
