@@ -2,12 +2,11 @@
  * File              : ann.h
  * Author            : Wan Li
  * Date              : 05.09.2019
- * Last Modified Date: 06.09.2019
+ * Last Modified Date: 09.09.2019
  * Last Modified By  : Wan Li
  */
 
-#ifndef ANN_H
-#define ANN_H
+#pragma once
 
 #include <iostream>
 #include <queue>
@@ -121,5 +120,3 @@ class ANN {
 };
 
 } // namespace ann
-
-#endif
